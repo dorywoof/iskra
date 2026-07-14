@@ -107,7 +107,7 @@ export function ReviewPage() {
 
   if (phase === 'loading') {
     return (
-      <div className="grain flex min-h-full items-center justify-center">
+      <div className="grain flex min-h-dvh items-center justify-center">
         <span className="font-display text-lg font-bold uppercase tracking-widest text-spark">Загрузка…</span>
       </div>
     )
@@ -115,7 +115,7 @@ export function ReviewPage() {
 
   if (phase === 'missing') {
     return (
-      <div className="grain flex min-h-full flex-col items-center justify-center gap-4">
+      <div className="grain flex min-h-dvh flex-col items-center justify-center gap-4">
         <p className="font-body text-xl text-ink-soft dark:text-cream-soft">Колода не найдена.</p>
         <Link to="/" className="font-grotesk text-sm font-bold uppercase tracking-widest text-spark">
           ← Ко всем колодам
@@ -127,7 +127,7 @@ export function ReviewPage() {
   if (phase === 'done') {
     const reviewed = tally.again + tally.hard + tally.good + tally.easy
     return (
-      <div className="grain flex min-h-full flex-col items-center justify-center px-6">
+      <div className="grain flex min-h-dvh flex-col items-center justify-center px-6">
         <div className="w-full max-w-md border-2 border-ink bg-paper animate-spark-in dark:border-cream dark:bg-night-2">
           <div className="border-b-2 border-ink bg-spark px-6 py-4 dark:border-cream">
             <h1 className="font-display text-xl font-black uppercase tracking-tight text-paper">Сессия окончена</h1>
@@ -180,8 +180,8 @@ export function ReviewPage() {
   const progress = startCount === 0 ? 0 : Math.round((index / startCount) * 100)
 
   return (
-    <div className="grain flex min-h-full flex-col">
-      <header className="flex items-center justify-between gap-4 border-b-2 border-ink px-4 py-3 sm:px-6 dark:border-cream/70">
+    <div className="grain flex min-h-dvh flex-col">
+      <header className="safe-top safe-x flex items-center justify-between gap-4 border-b-2 border-ink px-4 py-3 sm:px-6 dark:border-cream/70">
         <button
           onClick={() => navigate(`/deck/${deckId}`)}
           className="font-grotesk text-xs font-bold uppercase tracking-widest text-ink-soft hover:text-spark dark:text-cream-soft"
@@ -201,12 +201,12 @@ export function ReviewPage() {
         <div className="w-full max-w-xl">
           <button
             onClick={() => setFlipped((f) => !f)}
-            className="block w-full border-2 border-ink bg-paper px-6 py-14 text-center animate-spark-in dark:border-cream dark:bg-night-2"
+            className="block w-full border-2 border-ink bg-paper px-4 py-10 text-center animate-spark-in sm:px-6 sm:py-14 dark:border-cream dark:bg-night-2"
           >
             <span className="font-grotesk text-[0.65rem] uppercase tracking-widest text-ink-soft dark:text-cream-soft">
               {deck?.frontLang}
             </span>
-            <p className="mt-3 font-display text-4xl font-black leading-tight text-ink sm:text-5xl dark:text-cream">
+            <p className="mt-3 font-display text-3xl font-black leading-tight text-ink break-words sm:text-5xl dark:text-cream">
               {current?.front}
             </p>
 
@@ -215,7 +215,7 @@ export function ReviewPage() {
                 <span className="font-grotesk text-[0.65rem] uppercase tracking-widest text-ink-soft dark:text-cream-soft">
                   {deck?.backLang}
                 </span>
-                <p className="mt-2 font-body text-3xl font-semibold text-spark dark:text-spark">{current?.back}</p>
+                <p className="mt-2 font-body text-3xl font-semibold text-spark break-words dark:text-spark">{current?.back}</p>
                 {current?.example && (
                   <p className="mt-5 font-body text-lg italic text-ink dark:text-cream">{current.example}</p>
                 )}

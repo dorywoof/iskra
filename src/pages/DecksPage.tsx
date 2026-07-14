@@ -42,7 +42,7 @@ export function DecksPage() {
       <div className="mb-8 flex flex-col gap-4 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between dark:border-cream/60">
         <div>
           <p className="font-grotesk text-xs font-bold uppercase tracking-[0.3em] text-spark">Твои колоды</p>
-          <h1 className="mt-1 font-display text-4xl font-black uppercase leading-none text-ink sm:text-5xl dark:text-cream">
+          <h1 className="mt-1 font-display text-3xl font-black uppercase leading-tight text-ink break-words sm:text-5xl dark:text-cream">
             Учи по искре
           </h1>
           <p className="mt-3 max-w-md font-body text-lg text-ink-soft dark:text-cream-soft">
@@ -67,8 +67,8 @@ export function DecksPage() {
             >
               <div className="absolute left-0 top-0 h-full w-2" style={{ background: deck.accent }} />
               <div className="flex items-start justify-between gap-3 pl-3">
-                <div>
-                  <h2 className="font-display text-xl font-bold uppercase leading-tight text-ink dark:text-cream">
+                <div className="min-w-0">
+                  <h2 className="font-display text-lg font-bold uppercase leading-tight text-ink break-words sm:text-xl dark:text-cream">
                     {deck.title}
                   </h2>
                   <p className="mt-1 font-grotesk text-xs uppercase tracking-widest text-ink-soft dark:text-cream-soft">

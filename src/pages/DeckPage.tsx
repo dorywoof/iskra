@@ -165,10 +165,10 @@ export function DeckPage() {
       </Link>
 
       <div className="mt-3 flex flex-col gap-4 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between dark:border-cream/60">
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <span className="inline-block h-6 w-6" style={{ background: deck.accent }} />
-            <h1 className="font-display text-3xl font-black uppercase leading-none text-ink sm:text-4xl dark:text-cream">
+            <span className="inline-block h-6 w-6 shrink-0" style={{ background: deck.accent }} />
+            <h1 className="font-display text-2xl font-black uppercase leading-tight text-ink break-words sm:text-4xl dark:text-cream">
               {deck.title}
             </h1>
           </div>

@@ -25,7 +25,7 @@ export function App() {
 
   if (!ready) {
     return (
-      <div className="grain flex min-h-full items-center justify-center">
+      <div className="grain flex min-h-dvh items-center justify-center">
         <span className="font-display text-lg font-bold uppercase tracking-widest text-spark">Искра…</span>
       </div>
     )

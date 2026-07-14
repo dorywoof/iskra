@@ -53,7 +53,7 @@ export function StatsPage() {
   return (
     <div>
       <div className="border-b-2 border-ink pb-6 dark:border-cream/60">
-        <h1 className="font-display text-3xl font-black uppercase leading-none text-ink sm:text-4xl dark:text-cream">
+        <h1 className="font-display text-3xl font-black uppercase leading-tight text-ink break-words sm:text-4xl dark:text-cream">
           Статистика
         </h1>
         <p className="mt-2 font-grotesk text-xs uppercase tracking-widest text-ink-soft dark:text-cream-soft">

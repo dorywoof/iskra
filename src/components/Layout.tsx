@@ -11,9 +11,9 @@ export function Layout() {
   const [theme, toggle] = useTheme()
 
   return (
-    <div className="grain min-h-full">
-      <header className="border-b-2 border-ink dark:border-cream/70">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+    <div className="grain min-h-dvh">
+      <header className="safe-top safe-x border-b-2 border-ink dark:border-cream/70">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
           <NavLink to="/" className="flex items-center gap-3">
             <SparkMark size={34} />
             <span className="font-display text-2xl font-black uppercase tracking-tight text-ink dark:text-cream">
@@ -51,11 +51,11 @@ export function Layout() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <main className="safe-x mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <Outlet />
       </main>
 
-      <footer className="mx-auto max-w-4xl px-4 pb-10 pt-4 sm:px-6">
+      <footer className="safe-x safe-bottom mx-auto max-w-4xl px-4 pb-10 pt-4 sm:px-6">
         <p className="border-t border-ink/30 pt-4 font-grotesk text-xs uppercase tracking-widest text-ink-soft dark:border-cream/20 dark:text-cream-soft">
           Искра · интервальное повторение · данные хранятся только у вас
         </p>
