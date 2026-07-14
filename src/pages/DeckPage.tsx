@@ -6,12 +6,13 @@ import type { Card } from '../db/schema'
 import { addCard, updateCard, deleteCard, deleteDeck, renameDeck, importCards } from '../db/repository'
 import { toCsv, toJson, parseCsv, parseJson } from '../lib/porter'
 import type { PortableCard } from '../lib/porter'
+import { LANGUAGES, voiceForLabel } from '../lib/languages'
 import { relativeDue } from '../lib/date'
-import { speak, speechAvailable } from '../lib/speech'
+import { speak, speechAvailable, hasVoiceFor } from '../lib/speech'
 import { Modal } from '../components/Modal'
-import { Button, Field, TextInput, TextArea, Tag } from '../components/ui'
+import { Button, Field, Select, TextInput, TextArea, Tag } from '../components/ui'
 
-const emptyCard = { front: '', back: '', example: '', note: '' }
+const emptyCard = { front: '', back: '', example: '', exampleTranslation: '', note: '' }
 
 export function DeckPage() {
   const params = useParams()
@@ -55,7 +56,13 @@ export function DeckPage() {
   }
 
   function openEdit(card: Card) {
-    setDraft({ front: card.front, back: card.back, example: card.example, note: card.note })
+    setDraft({
+      front: card.front,
+      back: card.back,
+      example: card.example,
+      exampleTranslation: card.exampleTranslation ?? '',
+      note: card.note
+    })
     setEditing(card)
     setAdding(true)
   }
@@ -63,7 +70,13 @@ export function DeckPage() {
   async function saveCard() {
     if (!draft.front.trim() || !draft.back.trim()) return
     if (editing) {
-      await updateCard(editing.id, { front: draft.front.trim(), back: draft.back.trim(), example: draft.example.trim(), note: draft.note.trim() })
+      await updateCard(editing.id, {
+        front: draft.front.trim(),
+        back: draft.back.trim(),
+        example: draft.example.trim(),
+        exampleTranslation: draft.exampleTranslation.trim(),
+        note: draft.note.trim()
+      })
     } else {
       await addCard(deckId, draft)
     }
@@ -82,14 +95,22 @@ export function DeckPage() {
     URL.revokeObjectURL(url)
   }
 
+  function portableCards(): PortableCard[] {
+    return (cards ?? []).map((c) => ({
+      front: c.front,
+      back: c.back,
+      example: c.example,
+      exampleTranslation: c.exampleTranslation ?? '',
+      note: c.note
+    }))
+  }
+
   function exportCsv() {
-    const portable: PortableCard[] = (cards ?? []).map((c) => ({ front: c.front, back: c.back, example: c.example, note: c.note }))
-    download(`${deck!.title}.csv`, toCsv(portable), 'text/csv;charset=utf-8')
+    download(`${deck!.title}.csv`, toCsv(portableCards()), 'text/csv;charset=utf-8')
   }
 
   function exportJson() {
-    const portable: PortableCard[] = (cards ?? []).map((c) => ({ front: c.front, back: c.back, example: c.example, note: c.note }))
-    download(`${deck!.title}.json`, toJson(portable), 'application/json')
+    download(`${deck!.title}.json`, toJson(portableCards()), 'application/json')
   }
 
   async function runImport() {
@@ -126,10 +147,13 @@ export function DeckPage() {
   }
 
   async function saveDeckSettings() {
+    const frontLang = deckDraft.frontLang.trim() || deck!.frontLang
+    const backLang = deckDraft.backLang.trim() || deck!.backLang
     await renameDeck(deckId, {
       title: deckDraft.title.trim() || deck!.title,
-      frontLang: deckDraft.frontLang.trim() || deck!.frontLang,
-      backLang: deckDraft.backLang.trim() || deck!.backLang
+      frontLang,
+      backLang,
+      voice: voiceForLabel(frontLang)
     })
     setSettingsOpen(false)
   }
@@ -215,6 +239,11 @@ export function DeckPage() {
                   {card.example}
                 </p>
               )}
+              {card.exampleTranslation && (
+                <p className="truncate font-body text-sm text-ink-soft/70 dark:text-cream-soft/70">
+                  {card.exampleTranslation}
+                </p>
+              )}
             </div>
             <span className="hidden shrink-0 font-grotesk text-[0.65rem] uppercase tracking-widest text-ink-soft sm:block dark:text-cream-soft">
               {card.dueAt <= now ? 'к повтору' : relativeDue(card.dueAt, now)}
@@ -255,8 +284,14 @@ export function DeckPage() {
               <TextInput value={draft.back} onChange={(e) => setDraft({ ...draft, back: e.target.value })} />
             </Field>
           </div>
-          <Field label="Пример (необязательно)">
+          <Field label={`Пример на «${deck.frontLang}» (необязательно)`}>
             <TextInput value={draft.example} onChange={(e) => setDraft({ ...draft, example: e.target.value })} />
+          </Field>
+          <Field label={`Перевод примера на «${deck.backLang}» (необязательно)`}>
+            <TextInput
+              value={draft.exampleTranslation}
+              onChange={(e) => setDraft({ ...draft, exampleTranslation: e.target.value })}
+            />
           </Field>
           <Field label="Заметка (необязательно)">
             <TextArea rows={2} value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} />
@@ -304,13 +339,29 @@ export function DeckPage() {
             <TextInput value={deckDraft.title} onChange={(e) => setDeckDraft({ ...deckDraft, title: e.target.value })} />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Лицевая сторона">
-              <TextInput value={deckDraft.frontLang} onChange={(e) => setDeckDraft({ ...deckDraft, frontLang: e.target.value })} />
+            <Field label="Учу язык (лицо)">
+              <Select value={deckDraft.frontLang} onChange={(e) => setDeckDraft({ ...deckDraft, frontLang: e.target.value })}>
+                {LANGUAGES.map((l) => (
+                  <option key={l.label} value={l.label}>
+                    {l.label}
+                  </option>
+                ))}
+              </Select>
             </Field>
-            <Field label="Обратная сторона">
-              <TextInput value={deckDraft.backLang} onChange={(e) => setDeckDraft({ ...deckDraft, backLang: e.target.value })} />
+            <Field label="Перевод (оборот)">
+              <Select value={deckDraft.backLang} onChange={(e) => setDeckDraft({ ...deckDraft, backLang: e.target.value })}>
+                {LANGUAGES.map((l) => (
+                  <option key={l.label} value={l.label}>
+                    {l.label}
+                  </option>
+                ))}
+              </Select>
             </Field>
           </div>
+          <p className="font-grotesk text-xs uppercase tracking-wide text-ink-soft dark:text-cream-soft">
+            Озвучка: {deckDraft.frontLang}
+            {!hasVoiceFor(voiceForLabel(deckDraft.frontLang)) && ' · голос не найден в системе'}
+          </p>
           <div className="flex items-center justify-between border-t border-ink/20 pt-4 dark:border-cream/20">
             <button
               onClick={removeDeck}

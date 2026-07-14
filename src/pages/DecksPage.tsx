@@ -3,23 +3,15 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/schema'
 import { createDeck } from '../db/repository'
+import { LANGUAGES, voiceForLabel } from '../lib/languages'
 import { Modal } from '../components/Modal'
-import { Button, Field, TextInput, Tag } from '../components/ui'
-
-const VOICE_OPTIONS = [
-  { code: 'ru-RU', label: 'Русский' },
-  { code: 'en-US', label: 'English' },
-  { code: 'de-DE', label: 'Deutsch' },
-  { code: 'fr-FR', label: 'Français' },
-  { code: 'es-ES', label: 'Español' },
-  { code: 'tr-TR', label: 'Türkçe' }
-]
+import { Button, Field, Select, TextInput, Tag } from '../components/ui'
 
 export function DecksPage() {
   const decks = useLiveQuery(() => db.decks.orderBy('createdAt').toArray(), [])
   const cards = useLiveQuery(() => db.cards.toArray(), [])
   const [creating, setCreating] = useState(false)
-  const [form, setForm] = useState({ title: '', frontLang: 'Русский', backLang: 'English', voice: 'ru-RU' })
+  const [form, setForm] = useState({ title: '', frontLang: 'Русский', backLang: 'Türkçe' })
 
   const now = Date.now()
   const stats = useMemo(() => {
@@ -35,8 +27,13 @@ export function DecksPage() {
 
   async function submit() {
     if (!form.title.trim()) return
-    await createDeck(form)
-    setForm({ title: '', frontLang: 'Русский', backLang: 'English', voice: 'ru-RU' })
+    await createDeck({
+      title: form.title,
+      frontLang: form.frontLang,
+      backLang: form.backLang,
+      voice: voiceForLabel(form.frontLang)
+    })
+    setForm({ title: '', frontLang: 'Русский', backLang: 'Türkçe' })
     setCreating(false)
   }
 
@@ -106,26 +103,28 @@ export function DecksPage() {
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Лицевая сторона">
-              <TextInput value={form.frontLang} onChange={(e) => setForm({ ...form, frontLang: e.target.value })} />
+            <Field label="Учу язык (лицо)">
+              <Select value={form.frontLang} onChange={(e) => setForm({ ...form, frontLang: e.target.value })}>
+                {LANGUAGES.map((l) => (
+                  <option key={l.label} value={l.label}>
+                    {l.label}
+                  </option>
+                ))}
+              </Select>
             </Field>
-            <Field label="Обратная сторона">
-              <TextInput value={form.backLang} onChange={(e) => setForm({ ...form, backLang: e.target.value })} />
+            <Field label="Перевод (оборот)">
+              <Select value={form.backLang} onChange={(e) => setForm({ ...form, backLang: e.target.value })}>
+                {LANGUAGES.map((l) => (
+                  <option key={l.label} value={l.label}>
+                    {l.label}
+                  </option>
+                ))}
+              </Select>
             </Field>
           </div>
-          <Field label="Голос озвучки">
-            <select
-              value={form.voice}
-              onChange={(e) => setForm({ ...form, voice: e.target.value })}
-              className="w-full border-2 border-ink bg-transparent px-3 py-2 font-body text-lg text-ink outline-none focus:border-spark dark:border-cream/60 dark:text-cream dark:[&>option]:text-ink"
-            >
-              {VOICE_OPTIONS.map((v) => (
-                <option key={v.code} value={v.code}>
-                  {v.label} ({v.code})
-                </option>
-              ))}
-            </select>
-          </Field>
+          <p className="font-grotesk text-xs uppercase tracking-wide text-ink-soft dark:text-cream-soft">
+            Озвучка: {form.frontLang}
+          </p>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" onClick={() => setCreating(false)}>
               Отмена

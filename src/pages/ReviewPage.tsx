@@ -6,6 +6,7 @@ import { dueCards, gradeCard } from '../db/repository'
 import { previewIntervals } from '../lib/sm2'
 import type { Grade } from '../lib/sm2'
 import { speak, speechAvailable } from '../lib/speech'
+import { voiceForLabel } from '../lib/languages'
 
 const gradeMeta: Array<{ grade: Grade; key: string; label: string; color: string }> = [
   { grade: 'again', key: '1', label: 'Снова', color: '#D8402F' },
@@ -213,10 +214,15 @@ export function ReviewPage() {
                 </span>
                 <p className="mt-2 font-body text-3xl font-semibold text-spark dark:text-spark">{current?.back}</p>
                 {current?.example && (
-                  <p className="mt-4 font-body text-lg italic text-ink-soft dark:text-cream-soft">{current.example}</p>
+                  <p className="mt-5 font-body text-lg italic text-ink dark:text-cream">{current.example}</p>
+                )}
+                {current?.exampleTranslation && (
+                  <p className="mt-1 font-body text-base text-ink-soft dark:text-cream-soft">
+                    {current.exampleTranslation}
+                  </p>
                 )}
                 {current?.note && (
-                  <p className="mt-2 font-grotesk text-xs uppercase tracking-wide text-ochre-deep dark:text-ochre">
+                  <p className="mt-3 font-grotesk text-xs uppercase tracking-wide text-ochre-deep dark:text-ochre">
                     {current.note}
                   </p>
                 )}
@@ -225,13 +231,21 @@ export function ReviewPage() {
           </button>
 
           {speechAvailable() && deck && (
-            <div className="mt-3 flex justify-center">
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
               <button
-                onClick={() => speak(flipped && current ? current.front : current?.front ?? '', deck.voice)}
+                onClick={() => speak(current?.front ?? '', deck.voice)}
                 className="border-2 border-ink px-3 py-1.5 font-grotesk text-xs font-bold uppercase tracking-widest text-ink hover:bg-ink hover:text-paper dark:border-cream/70 dark:text-cream dark:hover:bg-cream dark:hover:text-night"
               >
-                🔊 Произнести
+                🔊 {deck.frontLang}
               </button>
+              {flipped && current?.back && (
+                <button
+                  onClick={() => speak(current.back, voiceForLabel(deck.backLang))}
+                  className="border-2 border-ink px-3 py-1.5 font-grotesk text-xs font-bold uppercase tracking-widest text-ink hover:bg-ink hover:text-paper dark:border-cream/70 dark:text-cream dark:hover:bg-cream dark:hover:text-night"
+                >
+                  🔊 {deck.backLang}
+                </button>
+              )}
             </div>
           )}
 

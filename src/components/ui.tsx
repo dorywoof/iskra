@@ -1,4 +1,10 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, TextareaHTMLAttributes, ReactNode } from 'react'
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+  ReactNode
+} from 'react'
 
 type Variant = 'solid' | 'outline' | 'ghost'
 
@@ -44,6 +50,15 @@ export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
 
 export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea {...props} className={`${controlClass} resize-y ${props.className ?? ''}`} />
+}
+
+export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select
+      {...props}
+      className={`${controlClass} appearance-none dark:[&>option]:text-ink ${props.className ?? ''}`}
+    />
+  )
 }
 
 export function Tag({ children }: { children: ReactNode }) {
