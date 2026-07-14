@@ -3,12 +3,32 @@ export function speechAvailable(): boolean {
 }
 
 let cachedVoices: SpeechSynthesisVoice[] = []
+const listeners = new Set<() => void>()
+let bound = false
 
 function loadVoices(): SpeechSynthesisVoice[] {
   if (!speechAvailable()) return []
   const voices = window.speechSynthesis.getVoices()
   if (voices.length > 0) cachedVoices = voices
   return cachedVoices
+}
+
+function ensureBound(): void {
+  if (bound || !speechAvailable()) return
+  bound = true
+  window.speechSynthesis.onvoiceschanged = () => {
+    loadVoices()
+    listeners.forEach((cb) => cb())
+  }
+}
+
+export function subscribeVoices(callback: () => void): () => void {
+  ensureBound()
+  loadVoices()
+  listeners.add(callback)
+  return () => {
+    listeners.delete(callback)
+  }
 }
 
 export function voicesForLang(lang: string): SpeechSynthesisVoice[] {
@@ -26,8 +46,8 @@ function pickVoice(lang: string): SpeechSynthesisVoice | undefined {
   return exact ?? matches[0]
 }
 
-export function speak(text: string, lang: string): void {
-  if (!speechAvailable() || !text.trim()) return
+export function speak(text: string, lang: string): boolean {
+  if (!speechAvailable() || !text.trim()) return false
   const synth = window.speechSynthesis
   if (synth.speaking || synth.pending) synth.cancel()
   const utterance = new SpeechSynthesisUtterance(text.trim())
@@ -45,13 +65,5 @@ export function speak(text: string, lang: string): void {
   } else {
     start()
   }
-}
-
-export function primeVoices(onReady: () => void): void {
-  if (!speechAvailable()) return
-  loadVoices()
-  window.speechSynthesis.onvoiceschanged = () => {
-    loadVoices()
-    onReady()
-  }
+  return Boolean(voice)
 }

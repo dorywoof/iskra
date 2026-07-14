@@ -5,7 +5,7 @@ import type { Card, Deck } from '../db/schema'
 import { dueCards, gradeCard } from '../db/repository'
 import { previewIntervals } from '../lib/sm2'
 import type { Grade } from '../lib/sm2'
-import { speak, speechAvailable } from '../lib/speech'
+import { speak, speechAvailable, hasVoiceFor, subscribeVoices } from '../lib/speech'
 import { voiceForLabel } from '../lib/languages'
 
 const gradeMeta: Array<{ grade: Grade; key: string; label: string; color: string }> = [
@@ -29,6 +29,9 @@ export function ReviewPage() {
   const [phase, setPhase] = useState<Phase>('loading')
   const [tally, setTally] = useState({ again: 0, hard: 0, good: 0, easy: 0 })
   const [startCount, setStartCount] = useState(0)
+  const [, setVoicesTick] = useState(0)
+
+  useEffect(() => subscribeVoices(() => setVoicesTick((n) => n + 1)), [])
 
   useEffect(() => {
     let alive = true
@@ -231,20 +234,27 @@ export function ReviewPage() {
           </button>
 
           {speechAvailable() && deck && (
-            <div className="mt-3 flex flex-wrap justify-center gap-2">
-              <button
-                onClick={() => speak(current?.front ?? '', deck.voice)}
-                className="border-2 border-ink px-3 py-1.5 font-grotesk text-xs font-bold uppercase tracking-widest text-ink hover:bg-ink hover:text-paper dark:border-cream/70 dark:text-cream dark:hover:bg-cream dark:hover:text-night"
-              >
-                🔊 {deck.frontLang}
-              </button>
-              {flipped && current?.back && (
+            <div className="mt-3 flex flex-col items-center gap-1.5">
+              <div className="flex flex-wrap justify-center gap-2">
                 <button
-                  onClick={() => speak(current.back, voiceForLabel(deck.backLang))}
+                  onClick={() => speak(current?.front ?? '', deck.voice)}
                   className="border-2 border-ink px-3 py-1.5 font-grotesk text-xs font-bold uppercase tracking-widest text-ink hover:bg-ink hover:text-paper dark:border-cream/70 dark:text-cream dark:hover:bg-cream dark:hover:text-night"
                 >
-                  🔊 {deck.backLang}
+                  🔊 {deck.frontLang}
                 </button>
+                {flipped && current?.back && (
+                  <button
+                    onClick={() => speak(current.back, voiceForLabel(deck.backLang))}
+                    className="border-2 border-ink px-3 py-1.5 font-grotesk text-xs font-bold uppercase tracking-widest text-ink hover:bg-ink hover:text-paper dark:border-cream/70 dark:text-cream dark:hover:bg-cream dark:hover:text-night"
+                  >
+                    🔊 {deck.backLang}
+                  </button>
+                )}
+              </div>
+              {!hasVoiceFor(deck.voice) && (
+                <p className="max-w-xs text-center font-grotesk text-[0.65rem] uppercase tracking-wide text-spark">
+                  Голос «{deck.frontLang}» не установлен в системе — звука не будет, пока не добавишь его в настройках Windows
+                </p>
               )}
             </div>
           )}

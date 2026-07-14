@@ -6,7 +6,7 @@ import { DeckPage } from './pages/DeckPage'
 import { ReviewPage } from './pages/ReviewPage'
 import { StatsPage } from './pages/StatsPage'
 import { ensureSeeded } from './db/repository'
-import { primeVoices } from './lib/speech'
+import { subscribeVoices } from './lib/speech'
 
 export function App() {
   const [ready, setReady] = useState(false)
@@ -16,9 +16,10 @@ export function App() {
     ensureSeeded().then(() => {
       if (alive) setReady(true)
     })
-    primeVoices(() => undefined)
+    const unsubscribe = subscribeVoices(() => undefined)
     return () => {
       alive = false
+      unsubscribe()
     }
   }, [])
 
