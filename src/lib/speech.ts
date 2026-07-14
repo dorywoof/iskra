@@ -16,15 +16,35 @@ export function voicesForLang(lang: string): SpeechSynthesisVoice[] {
   return loadVoices().filter((v) => v.lang.toLowerCase().startsWith(prefix))
 }
 
+export function hasVoiceFor(lang: string): boolean {
+  return voicesForLang(lang).length > 0
+}
+
+function pickVoice(lang: string): SpeechSynthesisVoice | undefined {
+  const matches = voicesForLang(lang)
+  const exact = matches.find((v) => v.lang.toLowerCase() === lang.toLowerCase())
+  return exact ?? matches[0]
+}
+
 export function speak(text: string, lang: string): void {
   if (!speechAvailable() || !text.trim()) return
-  window.speechSynthesis.cancel()
-  const utterance = new SpeechSynthesisUtterance(text)
+  const synth = window.speechSynthesis
+  if (synth.speaking || synth.pending) synth.cancel()
+  const utterance = new SpeechSynthesisUtterance(text.trim())
   utterance.lang = lang
-  const match = voicesForLang(lang)[0]
-  if (match) utterance.voice = match
-  utterance.rate = 0.92
-  window.speechSynthesis.speak(utterance)
+  const voice = pickVoice(lang)
+  if (voice) utterance.voice = voice
+  utterance.rate = 0.9
+  utterance.pitch = 1
+  const start = () => {
+    synth.resume()
+    synth.speak(utterance)
+  }
+  if (loadVoices().length === 0) {
+    window.setTimeout(start, 200)
+  } else {
+    start()
+  }
 }
 
 export function primeVoices(onReady: () => void): void {
