@@ -1,0 +1,86 @@
+@import 'tailwindcss';
+
+@import '@fontsource/unbounded/400.css';
+@import '@fontsource/unbounded/700.css';
+@import '@fontsource/unbounded/900.css';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/newsreader';
+
+@theme {
+  --font-display: 'Unbounded', system-ui, sans-serif;
+  --font-grotesk: 'Space Grotesk Variable', system-ui, sans-serif;
+  --font-body: 'Newsreader Variable', Georgia, serif;
+
+  --color-paper: #f2ebdd;
+  --color-paper-2: #e7ddc8;
+  --color-ink: #17140f;
+  --color-ink-soft: #4a4336;
+  --color-spark: #d8402f;
+  --color-spark-deep: #b32a1c;
+  --color-ochre: #c8912b;
+  --color-ochre-deep: #9a6d17;
+
+  --color-night: #17140f;
+  --color-night-2: #211d16;
+  --color-cream: #f2ebdd;
+  --color-cream-soft: #b8ae98;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:root.dark body {
+  background-color: var(--color-night);
+  color: var(--color-cream);
+}
+
+::selection {
+  background: var(--color-spark);
+  color: var(--color-paper);
+}
+
+@keyframes spark-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-spark-in {
+  animation: spark-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.grain {
+  background-image: radial-gradient(rgba(23, 20, 15, 0.045) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+:root.dark .grain {
+  background-image: radial-gradient(rgba(242, 235, 221, 0.04) 1px, transparent 1px);
+}
