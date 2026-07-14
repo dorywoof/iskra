@@ -9,34 +9,50 @@ const ACCENTS = ['#D8402F', '#C8912B', '#3B6B4A', '#2F5F8A', '#8A3F6B']
 
 export async function ensureSeeded(): Promise<void> {
   const count = await db.decks.count()
-  if (count > 0) return
-  const now = Date.now()
-  const deckId = await db.decks.add({
-    title: starterDeck.title,
-    frontLang: starterDeck.frontLang,
-    backLang: starterDeck.backLang,
-    voice: starterDeck.voice,
-    accent: starterDeck.accent,
-    createdAt: now
-  } as Deck)
-  await db.cards.bulkAdd(
-    starterCards.map((c, index) => {
-      const state = freshState(now + index)
-      return {
-        deckId: deckId as number,
-        front: c.front,
-        back: c.back,
-        example: c.example,
-        note: c.note,
-        easeFactor: state.easeFactor,
-        intervalDays: state.intervalDays,
-        repetitions: state.repetitions,
-        dueAt: state.dueAt,
-        lastReviewedAt: state.lastReviewedAt,
-        createdAt: now + index
-      } as Card
-    })
-  )
+  if (count === 0) {
+    const now = Date.now()
+    const deckId = await db.decks.add({
+      title: starterDeck.title,
+      frontLang: starterDeck.frontLang,
+      backLang: starterDeck.backLang,
+      voice: starterDeck.voice,
+      accent: starterDeck.accent,
+      createdAt: now
+    } as Deck)
+    await db.cards.bulkAdd(
+      starterCards.map((c, index) => {
+        const state = freshState(now + index)
+        return {
+          deckId: deckId as number,
+          front: c.front,
+          back: c.back,
+          example: c.example,
+          exampleTranslation: c.exampleTranslation,
+          note: c.note,
+          easeFactor: state.easeFactor,
+          intervalDays: state.intervalDays,
+          repetitions: state.repetitions,
+          dueAt: state.dueAt,
+          lastReviewedAt: state.lastReviewedAt,
+          createdAt: now + index
+        } as Card
+      })
+    )
+  }
+  await backfillStarterTranslations()
+}
+
+async function backfillStarterTranslations(): Promise<void> {
+  const deck = await db.decks.where('title').equals(starterDeck.title).first()
+  if (!deck) return
+  const translations = new Map(starterCards.map((c) => [c.front, c.exampleTranslation]))
+  const cards = await db.cards.where('deckId').equals(deck.id).toArray()
+  for (const card of cards) {
+    const fill = translations.get(card.front)
+    if (fill && !card.exampleTranslation) {
+      await db.cards.update(card.id, { exampleTranslation: fill })
+    }
+  }
 }
 
 export async function createDeck(input: {
@@ -75,6 +91,7 @@ export async function addCard(deckId: number, input: {
   front: string
   back: string
   example?: string
+  exampleTranslation?: string
   note?: string
 }): Promise<number> {
   const now = Date.now()
@@ -84,6 +101,7 @@ export async function addCard(deckId: number, input: {
     front: input.front.trim(),
     back: input.back.trim(),
     example: (input.example ?? '').trim(),
+    exampleTranslation: (input.exampleTranslation ?? '').trim(),
     note: (input.note ?? '').trim(),
     easeFactor: state.easeFactor,
     intervalDays: state.intervalDays,
@@ -148,6 +166,7 @@ export async function importCards(deckId: number, rows: Array<{
   front: string
   back: string
   example?: string
+  exampleTranslation?: string
   note?: string
 }>): Promise<number> {
   const now = Date.now()
@@ -160,6 +179,7 @@ export async function importCards(deckId: number, rows: Array<{
         front: r.front.trim(),
         back: r.back.trim(),
         example: (r.example ?? '').trim(),
+        exampleTranslation: (r.exampleTranslation ?? '').trim(),
         note: (r.note ?? '').trim(),
         easeFactor: state.easeFactor,
         intervalDays: state.intervalDays,

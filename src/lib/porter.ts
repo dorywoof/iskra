@@ -2,6 +2,7 @@ export interface PortableCard {
   front: string
   back: string
   example: string
+  exampleTranslation: string
   note: string
 }
 
@@ -13,10 +14,12 @@ function escapeCsvField(value: string): string {
 }
 
 export function toCsv(cards: PortableCard[]): string {
-  const header = ['front', 'back', 'example', 'note']
+  const header = ['front', 'back', 'example', 'exampleTranslation', 'note']
   const lines = [header.join(',')]
   for (const card of cards) {
-    lines.push([card.front, card.back, card.example, card.note].map(escapeCsvField).join(','))
+    lines.push(
+      [card.front, card.back, card.example, card.exampleTranslation, card.note].map(escapeCsvField).join(',')
+    )
   }
   return lines.join('\n')
 }
@@ -28,6 +31,7 @@ export function parseCsv(text: string): PortableCard[] {
   const frontIndex = header.indexOf('front')
   const backIndex = header.indexOf('back')
   const exampleIndex = header.indexOf('example')
+  const exampleTranslationIndex = header.indexOf('exampletranslation')
   const noteIndex = header.indexOf('note')
 
   const hasHeader = frontIndex !== -1 && backIndex !== -1
@@ -41,6 +45,7 @@ export function parseCsv(text: string): PortableCard[] {
           front: (cols[frontIndex] ?? '').trim(),
           back: (cols[backIndex] ?? '').trim(),
           example: exampleIndex === -1 ? '' : (cols[exampleIndex] ?? '').trim(),
+          exampleTranslation: exampleTranslationIndex === -1 ? '' : (cols[exampleTranslationIndex] ?? '').trim(),
           note: noteIndex === -1 ? '' : (cols[noteIndex] ?? '').trim()
         }
       }
@@ -48,7 +53,8 @@ export function parseCsv(text: string): PortableCard[] {
         front: (cols[0] ?? '').trim(),
         back: (cols[1] ?? '').trim(),
         example: (cols[2] ?? '').trim(),
-        note: (cols[3] ?? '').trim()
+        exampleTranslation: (cols[3] ?? '').trim(),
+        note: (cols[4] ?? '').trim()
       }
     })
     .filter((c) => c.front !== '' && c.back !== '')
@@ -109,6 +115,7 @@ export function parseJson(text: string): PortableCard[] {
       front: String(item.front ?? '').trim(),
       back: String(item.back ?? '').trim(),
       example: String(item.example ?? '').trim(),
+      exampleTranslation: String(item.exampleTranslation ?? '').trim(),
       note: String(item.note ?? '').trim()
     }))
     .filter((c) => c.front !== '' && c.back !== '')

@@ -3,8 +3,8 @@ import { toCsv, parseCsv, toJson, parseJson } from './porter'
 import type { PortableCard } from './porter'
 
 const sample: PortableCard[] = [
-  { front: 'привет', back: 'hello', example: 'Привет, мир!', note: 'greeting' },
-  { front: 'да, нет', back: 'yes, no', example: 'Он сказал: "да".', note: '' }
+  { front: 'привет', back: 'hello', example: 'Привет, мир!', exampleTranslation: 'Hello, world!', note: 'greeting' },
+  { front: 'да, нет', back: 'yes, no', example: 'Он сказал: "да".', exampleTranslation: 'He said: "yes".', note: '' }
 ]
 
 describe('csv round-trip', () => {
@@ -23,7 +23,7 @@ describe('csv round-trip', () => {
   it('imports headerless two-column data', () => {
     const parsed = parseCsv('кот,cat\nсобака,dog')
     expect(parsed).toHaveLength(2)
-    expect(parsed[0]).toEqual({ front: 'кот', back: 'cat', example: '', note: '' })
+    expect(parsed[0]).toEqual({ front: 'кот', back: 'cat', example: '', exampleTranslation: '', note: '' })
   })
 
   it('skips rows missing a front or back', () => {
@@ -34,7 +34,7 @@ describe('csv round-trip', () => {
 
   it('tolerates windows line endings', () => {
     const parsed = parseCsv('front,back\r\nкот,cat\r\n')
-    expect(parsed).toEqual([{ front: 'кот', back: 'cat', example: '', note: '' }])
+    expect(parsed).toEqual([{ front: 'кот', back: 'cat', example: '', exampleTranslation: '', note: '' }])
   })
 })
 
@@ -46,7 +46,7 @@ describe('json round-trip', () => {
 
   it('coerces and trims loose fields', () => {
     const parsed = parseJson('[{"front":"  кот  ","back":"cat"}]')
-    expect(parsed).toEqual([{ front: 'кот', back: 'cat', example: '', note: '' }])
+    expect(parsed).toEqual([{ front: 'кот', back: 'cat', example: '', exampleTranslation: '', note: '' }])
   })
 
   it('rejects non-array payloads', () => {

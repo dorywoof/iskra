@@ -17,6 +17,7 @@ export interface Card {
   front: string
   back: string
   example: string
+  exampleTranslation: string
   note: string
   easeFactor: number
   intervalDays: number
