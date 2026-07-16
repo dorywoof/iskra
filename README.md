@@ -41,3 +41,7 @@ React · TypeScript · Vite · Tailwind CSS · Dexie (IndexedDB) · vite-plugin-
 ```sh
 npm run test
 ```
+
+## Версии / Versions
+
+История изменений — в [CHANGELOG.md](CHANGELOG.md).

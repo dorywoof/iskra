@@ -31,6 +31,7 @@ export function DeckPage() {
   const [importText, setImportText] = useState('')
   const [importOpen, setImportOpen] = useState(false)
   const [notice, setNotice] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const now = Date.now()
   const dueCount = useMemo(() => (cards ?? []).filter((c) => c.dueAt <= now).length, [cards, now])
@@ -142,6 +143,10 @@ export function DeckPage() {
   }
 
   async function removeDeck() {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
     await deleteDeck(deckId)
     navigate('/')
   }
@@ -206,6 +211,7 @@ export function DeckPage() {
         <button
           onClick={() => {
             setDeckDraft({ title: deck.title, frontLang: deck.frontLang, backLang: deck.backLang })
+            setConfirmDelete(false)
             setSettingsOpen(true)
           }}
           className="ml-auto font-grotesk text-xs font-bold uppercase tracking-widest text-ink-soft hover:text-spark dark:text-cream-soft"
@@ -310,7 +316,7 @@ export function DeckPage() {
       <Modal open={importOpen} title="Импорт карточек" onClose={() => setImportOpen(false)}>
         <div className="space-y-4">
           <p className="font-body text-base text-ink-soft dark:text-cream-soft">
-            Вставь CSV (front,back,example,note) или JSON-массив. Заголовок можно не указывать — тогда порядок колонок такой же.
+            Вставь CSV (front,back,example,exampleTranslation,note) или JSON-массив. Заголовок можно не указывать — тогда порядок колонок такой же.
           </p>
           <TextArea
             rows={8}
@@ -367,7 +373,7 @@ export function DeckPage() {
               onClick={removeDeck}
               className="font-grotesk text-xs font-bold uppercase tracking-widest text-spark hover:text-spark-deep"
             >
-              Удалить колоду
+              {confirmDelete ? 'Точно удалить? Карточки не вернуть' : 'Удалить колоду'}
             </button>
             <div className="flex gap-2">
               <Button variant="ghost" onClick={() => setSettingsOpen(false)}>
