@@ -28,7 +28,6 @@ export function ReviewPage() {
   const [flipped, setFlipped] = useState(false)
   const [phase, setPhase] = useState<Phase>('loading')
   const [tally, setTally] = useState({ again: 0, hard: 0, good: 0, easy: 0 })
-  const [startCount, setStartCount] = useState(0)
   const [, setVoicesTick] = useState(0)
 
   useEffect(() => subscribeVoices(() => setVoicesTick((n) => n + 1)), [])
@@ -46,7 +45,6 @@ export function ReviewPage() {
       if (!alive) return
       setDeck(found)
       setQueue(cards)
-      setStartCount(cards.length)
       setPhase(cards.length === 0 ? 'done' : 'reviewing')
     }
     load()
@@ -77,6 +75,12 @@ export function ReviewPage() {
       await gradeCard(current, g)
       setTally((t) => ({ ...t, [g]: t[g] + 1 }))
       setFlipped(false)
+      if (g === 'again') {
+        const updated = await db.cards.get(current.id)
+        if (updated) setQueue((q) => [...q, updated])
+        setIndex((i) => i + 1)
+        return
+      }
       if (index + 1 >= queue.length) {
         setPhase('done')
       } else {
@@ -177,7 +181,7 @@ export function ReviewPage() {
     )
   }
 
-  const progress = startCount === 0 ? 0 : Math.round((index / startCount) * 100)
+  const progress = queue.length === 0 ? 0 : Math.round((index / queue.length) * 100)
 
   return (
     <div className="grain flex min-h-dvh flex-col">
@@ -189,7 +193,7 @@ export function ReviewPage() {
           ✕ Выйти
         </button>
         <span className="font-grotesk text-xs font-bold uppercase tracking-widest text-ink-soft dark:text-cream-soft">
-          {index + 1} / {startCount}
+          {index + 1} / {queue.length}
         </span>
       </header>
 

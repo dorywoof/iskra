@@ -32,9 +32,19 @@ export function DeckPage() {
   const [importOpen, setImportOpen] = useState(false)
   const [notice, setNotice] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [query, setQuery] = useState('')
 
   const now = Date.now()
   const dueCount = useMemo(() => (cards ?? []).filter((c) => c.dueAt <= now).length, [cards, now])
+  const visibleCards = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return cards ?? []
+    return (cards ?? []).filter((c) =>
+      [c.front, c.back, c.example, c.exampleTranslation ?? '', c.note].some((field) =>
+        field.toLowerCase().includes(q)
+      )
+    )
+  }, [cards, query])
 
   if (deck === undefined) {
     return <p className="font-body text-lg text-ink-soft">Загрузка…</p>
@@ -227,13 +237,34 @@ export function DeckPage() {
         </p>
       )}
 
-      <ul className="mt-6 divide-y divide-ink/15 border-2 border-ink dark:divide-cream/15 dark:border-cream/60">
+      {(cards ?? []).length > 0 && (
+        <div className="mt-6 flex items-center gap-3">
+          <TextInput
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Поиск по колоде…"
+            aria-label="Поиск по колоде"
+          />
+          {query.trim() && (
+            <span className="shrink-0 font-grotesk text-xs uppercase tracking-widest text-ink-soft dark:text-cream-soft">
+              {visibleCards.length} из {(cards ?? []).length}
+            </span>
+          )}
+        </div>
+      )}
+
+      <ul className="mt-4 divide-y divide-ink/15 border-2 border-ink dark:divide-cream/15 dark:border-cream/60">
         {(cards ?? []).length === 0 && (
           <li className="p-6 text-center font-body text-lg text-ink-soft dark:text-cream-soft">
             В колоде пока нет карточек. Добавь первую или импортируй список.
           </li>
         )}
-        {(cards ?? []).map((card) => (
+        {(cards ?? []).length > 0 && visibleCards.length === 0 && (
+          <li className="p-6 text-center font-body text-lg text-ink-soft dark:text-cream-soft">
+            Ничего не нашлось по запросу «{query.trim()}».
+          </li>
+        )}
+        {visibleCards.map((card) => (
           <li key={card.id} className="flex items-center gap-3 px-4 py-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline gap-3">
