@@ -71,3 +71,7 @@ statistics, search, and light/dark themes.
 
 Русский README выше — это мой родной язык проекта: я учу русский, и мне
 проще писать о своей программе на нём.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
